@@ -1,0 +1,7 @@
+.char-tile {
+  transition: color 1s;
+  
+  &.active {
+    color: black;
+  }
+}
