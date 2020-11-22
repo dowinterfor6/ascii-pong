@@ -1,7 +1,17 @@
 .char-tile {
+  color: $grey;
   transition: color 1s;
+  transition-delay: 1s;
   
+  &.isClickable {
+    cursor: pointer;
+  }
+
   &.active {
     color: black;
+
+    &.selected {
+      font-weight: bold;
+    }
   }
 }

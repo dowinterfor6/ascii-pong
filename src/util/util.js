@@ -36,14 +36,16 @@ export const getLanding = (docHeight, docWidth) => {
     |                                   |
     |                                   |
     |                                   |
-    |  <div>---------   <div>---------  |
-    |  |     1p     |   |     2P     |  |
-    |  --------</div>   --------</div>  |
+    |  <option>------   <option>------  |
+    |  |     1P     |   |     2P     |  |
+    |  -----</option>   -----</option>  |
     |                                   |
     |                                   |
     |        <button>-----------        |
     |        |      Start      |        |
     |        ----------</button>        |
+    |                                   |
+    |                                   |
     |                                   |
     ---------------------------</section>`;
 
