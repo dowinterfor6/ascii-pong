@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
-const CharTile = ({ char, properties }) => {
+const CharTile = ({ char, active, selected, handleClick }) => {
   const tileRef = useRef();
-  const { active, selected, handleClick } = properties;
 
   useEffect(() => {
     if (active) {
@@ -25,4 +24,6 @@ const CharTile = ({ char, properties }) => {
   )
 }
 
-export default CharTile;
+const MemoizedCharTile = React.memo(CharTile);
+
+export default MemoizedCharTile;

@@ -261,7 +261,9 @@ const App = () => {
                 return (
                   <CharTile
                     char={tile.char}
-                    properties={tile.properties}
+                    active={tile.properties.active}
+                    selected={tile.properties.selected}
+                    handleClick={tile.properties.handleClick}
                     key={`${xidx}-${yidx}`}
                   />
                 )
