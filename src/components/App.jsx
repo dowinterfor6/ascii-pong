@@ -127,7 +127,7 @@ const App = () => {
   const p1PaddleCenterRef = useRef(p1PaddleCenter);
   const p2PaddleCenterRef = useRef(p2PaddleCenter);
 
-  const xDirThreshold = 0.25;
+  const xDirThreshold = 0.5;
 
   const getRandomUnitDirectionVector = () => {
     // X can't be less than something;
@@ -200,8 +200,8 @@ const App = () => {
   // Font Height: 14px, Width: 6.61px;
   const appRef = useRef();
 
-  // const [tileHeight, tileWidth] = [19, 9];
-  const [tileHeight, tileWidth] = [14, 6.61];
+  const [tileHeight, tileWidth] = [19, 9];
+  // const [tileHeight, tileWidth] = [14, 6.61];
 
   // Size of box = 19px 9px
   let numXTiles = Math.floor(document.body.clientWidth / tileWidth);
@@ -477,6 +477,7 @@ const App = () => {
 
   const setupPlayerKeybinds = () => {
     // TODO: Handle hold down?
+    // Make this a part of game tick to check performance
     // Lags a little, might need to set up to calculate pos and handle every 30/60fps state rerender
 
     document.addEventListener("keydown", (e) => {
@@ -571,6 +572,8 @@ const App = () => {
   
   const handleBallGameTick = () => {
     // TODO: Handle the ball destroying walls lol;
+    // Even after fix, it's still destroying walls rip
+    // I think it might be lag? Check back if updating paddle to gametick fixes it
 
     // Direction should be unit vector, the multiply by speed?
     const [nextX, nextY] = [
@@ -582,26 +585,32 @@ const App = () => {
 
     // Paddle = bounce X
     // Hardcoded based on paddle width
+    // Paddle hitbox tempfix
+    const tempHitboxFix = 0.5;
+
     if (
-      (nextX <= xCenter - halfWidth + 1 && (nextY <= p1PaddleCenterRef.current + 1 && nextY >= p1PaddleCenterRef.current - 1))
+      (Math.round(nextX) <= xCenter - halfWidth + 1 && (Math.round(nextY) <= p1PaddleCenterRef.current + 1 + tempHitboxFix && Math.round(nextY) >= p1PaddleCenterRef.current - 1 - tempHitboxFix))
       ||
-      (nextX >= xCenter + halfWidth - 1 && (nextY <= p2PaddleCenterRef.current + 1 && nextY >= p2PaddleCenterRef.current - 1))
+      (Math.round(nextX) >= xCenter + halfWidth - 1 && (Math.round(nextY) <= p2PaddleCenterRef.current + 1 + tempHitboxFix && Math.round(nextY) >= p2PaddleCenterRef.current - 1 - tempHitboxFix))
     ) {
-      // TODO: Bounce angle change based on where it hit on the paddle;
-      nextPos.x = ballPositionRef.current.x + (-ballDirectionRef.current.x * ballSpeed);
-      const xBounceDir = { x: -ballDirectionRef.current.x, y: ballDirectionRef.current.y };
-      setBallDirection(xBounceDir);
-      ballDirectionRef.current = xBounceDir;
+      console.log("PADDLE");
+      const paddleCenter = Math.round(nextX) <= xCenter - halfWidth + 1 ? p1PaddleCenterRef.current : p2PaddleCenterRef.current;
+      const newDir = getPaddleBouncedDir(nextY, paddleCenter, -ballDirectionRef.current.x);
+
+      nextPos.x = ballPositionRef.current.x + (newDir.x * ballSpeed);
+      nextPos.y = ballPositionRef.current.y + (newDir.y * ballSpeed);
+      setBallDirection(newDir);
+      ballDirectionRef.current = newDir;
     } else {
        // Left/Right walls = score for opposite side
-      if (nextX <= xCenter - halfWidth || nextX >= xCenter + halfWidth) {
+      if (Math.round(nextX) <= xCenter - halfWidth || Math.round(nextX) >= xCenter + halfWidth) {
         nextPos = { x: xCenter, y: yCenter };
         setBallPosition(nextPos);
         // TODO: Add time delay (maybe hard)
         const resetBallDirection = getRandomUnitDirectionVector();
         setBallDirection(resetBallDirection);
         ballDirectionRef.current = resetBallDirection;
-        if (nextX >= xCenter + halfWidth) {
+        if (Math.round(nextX) >= xCenter + halfWidth) {
           console.log("RIGHT WALL");
           incrementScore(1);
         } else {
@@ -613,15 +622,33 @@ const App = () => {
 
     // Check if next pos collide
     // Up/down walls = bounce Y, keep X
-    if (nextY <= yCenter - halfHeight || nextY >= yCenter + halfHeight) {
-      console.log("TOP/BOTTOM WALL");
+    if (Math.round(nextY) <= yCenter - halfHeight || Math.round(nextY) >= yCenter + halfHeight) {
       nextPos.y = ballPositionRef.current.y + (-ballDirectionRef.current.y * ballSpeed);
       const yBounceDir = { x: ballDirectionRef.current.x, y: -ballDirectionRef.current.y };
       setBallDirection(yBounceDir);
       ballDirectionRef.current = yBounceDir;
     }
 
+    // Check on boundary?
+
     moveBallToPos(nextPos);
+  }
+
+  const getPaddleBouncedDir = (ballY, paddleCenter, xDir) => {
+    // BallY - PaddleCenter / PaddleWidth/2 * PI + Offset to ensure y dir !== 0;
+    const ratio = (ballY - paddleCenter) / 1.5;
+    let angle = (ratio * Math.PI);
+
+    const angleThreshold = Math.PI - 1.5;
+
+    if (Math.abs(angle) >= angleThreshold) {
+      angle = angle > 0 ? angleThreshold : -angleThreshold;
+    }
+
+    const x = xDir / Math.abs(xDir) * Math.tan(Math.abs(angle));
+    const magnitude = Math.sqrt(1 + Math.pow(x, 2));
+
+    return { y: angle / Math.abs(angle) / magnitude, x: x / magnitude };
   }
 
   return (
