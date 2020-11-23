@@ -1,7 +1,8 @@
 .app {
-  // background: $black;
+  background: $black;
   height: 100%;
-  font-size: 16px;
+  // font-size: 16px;
+  font-size: 12px;
   font-family: monospace;
   color: $grey;
   word-break: break-all;
@@ -17,17 +18,22 @@
     padding: 0;
     display: flex;
     flex-direction: column;
-    justify-content: space-evenly;
+    // justify-content: space-evenly;
+    justify-content: center; // Attempt ball accuracy fix
 
     li {
       display: grid;
-      grid-template-columns: repeat(auto-fill, 9px);
+      // grid-template-columns: repeat(auto-fill, 9px);
+      grid-template-columns: repeat(auto-fill, 6.61px);
       align-items: center;
-      justify-content: space-evenly;
+      // justify-content: space-evenly;
+      justify-content: center;
 
       .char-tile {
-        height: 19px;
-        width: 9px;
+        // height: 19px;
+        // width: 9px;
+        height: 16px;
+        width: 6.61px;
       }
     }
   }

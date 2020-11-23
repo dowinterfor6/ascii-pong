@@ -197,9 +197,11 @@ const App = () => {
   window.setTile = setTile;  
 
   // Font Height: 19px, Width: 8.8px;
+  // Font Height: 14px, Width: 6.61px;
   const appRef = useRef();
 
-  const [tileHeight, tileWidth] = [19, 9];
+  // const [tileHeight, tileWidth] = [19, 9];
+  const [tileHeight, tileWidth] = [14, 6.61];
 
   // Size of box = 19px 9px
   let numXTiles = Math.floor(document.body.clientWidth / tileWidth);
@@ -477,7 +479,7 @@ const App = () => {
     // TODO: Handle hold down?
     // Lags a little, might need to set up to calculate pos and handle every 30/60fps state rerender
 
-    document.addEventListener("keyup", (e) => {
+    document.addEventListener("keydown", (e) => {
       if (!isGameActiveRef.current) return;
 
       // Limits

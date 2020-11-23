@@ -1,6 +1,6 @@
 .char-tile {
   color: $grey;
-  // color: $dark-green;
+  color: $dark-green;
   
   &.is-clickable {
     cursor: pointer;
@@ -11,7 +11,7 @@
     // TODO: Probably need another, faster one for paddle
     transition: color 1s;
     color: black;
-    // color: $light-green;
+    color: $light-green;
 
     &.ball {
       // Must be less than 30fps equivalent
