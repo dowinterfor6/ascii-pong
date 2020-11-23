@@ -1,8 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 
-const CharTile = ({ char, active, selected, handleClick }) => {
+const CharTile = ({ char, active, selected, handleClick, isBall }) => {
   const tileRef = useRef();
-
   // TODO: Add fade in animation at the start
 
   return (
@@ -11,7 +10,8 @@ const CharTile = ({ char, active, selected, handleClick }) => {
         char-tile
         ${active ? 'active' : ''}
         ${selected ? 'selected' : ''}
-        ${handleClick ? 'isClickable' : ''}
+        ${handleClick ? 'is-clickable' : ''}
+        ${isBall ? 'ball' : ''}
       `}
       ref={tileRef}
       onClick={handleClick}

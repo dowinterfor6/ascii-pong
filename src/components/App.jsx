@@ -127,6 +127,25 @@ const App = () => {
   const p1PaddleCenterRef = useRef(p1PaddleCenter);
   const p2PaddleCenterRef = useRef(p2PaddleCenter);
 
+  const xDirThreshold = 0.25;
+
+  const getRandomUnitDirectionVector = () => {
+    // X can't be less than something;
+    const x = Math.random() * (1 - xDirThreshold) + xDirThreshold;
+    const y = Math.random();
+    const xCoeff = Math.round(Math.random()) === 0 ? -1 : 1;
+    const yCoeff = Math.round(Math.random()) === 0 ? -1 : 1;
+    const magnitude = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+    return { x: xCoeff * x / magnitude, y: yCoeff * y / magnitude };
+  }
+
+  // TODO: ensure never up or down
+  const [ballDirection, setBallDirection] = useState(getRandomUnitDirectionVector());
+
+  const [ballPosition, setBallPosition] = useState({ x: 0, y: 0 });
+  const ballDirectionRef = useRef(ballDirection);
+  const ballPositionRef = useRef(ballPosition);
+
   const setTiles = (tiles) => dispatch({
     type: SET_TILES,
     payload: tiles
@@ -298,7 +317,6 @@ const App = () => {
   }
 
   const clearLanding = () => {
-    // TODO: Set clickable = false, handle click = nothing
     console.log("CLEAR LANDING");
     const landingMatrix = getLanding();
     const offsetX = ((numXTiles - 1) / 2) - ((landingMatrix[0].length - 1) / 2);
@@ -309,7 +327,7 @@ const App = () => {
         const currEl = landingMatrix[y][x].char;
         if (currEl !== " ") {
           const randChar = getRandomAsciiChar();
-          setTile(x + offsetX, y + offsetY, randChar, { active: false });
+          setTile(x + offsetX, y + offsetY, randChar, { active: false, clickable: false, handleClick: undefined });
         };
       };
     };
@@ -322,14 +340,21 @@ const App = () => {
   const halfWidth = 45;
   const halfHeight = 12;
 
+  let gameTick;
+  const ballSpeed = 1;
+
   const setupGameArea = () => {
     console.log("SETUP GAME AREA");
-    // Setup bounds
     setupGameBounds();
-    // Setup scoreboard
     setupScoreBoard();
-    // Setup paddles
     setupPaddles();
+    moveBallToPos({ x: xCenter, y: yCenter });
+    // set interval to update game physics
+    // TODO: Remember to clear interval when game finishes
+    gameTick = setInterval(() => {
+      handleBallGameTick();
+      // console.log("TICK");
+    }, 1000 / 30);
   };
 
   const setupGameBounds = () => {
@@ -359,13 +384,6 @@ const App = () => {
   // TODO: Also need an update scoreboard method
   const setupScoreBoard = () => {
     const [y1, y2] = [yOffset, yOffset + 4];
-    /* Score 5 high
-      OOOOO     OOOOO
-      O   O  O  O   O
-      O   O     O   O
-      O   O  O  O   O
-      OOOOO     OOOOO
-    */
     const zero = getDisplayNumMatrix(0);
     // Left bounds
     for (let y = 0; y < 5; y++) {
@@ -527,6 +545,7 @@ const App = () => {
     p2PaddleCenterRef.current = yCenter;
   }
 
+  // TODO: Definitely need this to put on the same as game tick thread
   const movePaddle = (player, currPos, direction) => {
     const paddleX = player === 1 ? xCenter - halfWidth + 1 : xCenter + halfWidth - 1;
 
@@ -541,7 +560,67 @@ const App = () => {
     }
   }
 
-  // console.log(state);
+  const moveBallToPos = ({ x, y }) => {
+    setTile(Math.round(ballPositionRef.current.x), Math.round(ballPositionRef.current.y), getRandomAsciiChar(), { active: false, isBall: false });
+    setBallPosition({ x, y });
+    ballPositionRef.current = { x, y };
+    setTile(Math.round(x), Math.round(y), "●", { active: true, isBall: true });
+  }
+  
+  const handleBallGameTick = () => {
+    // TODO: Handle the ball destroying walls lol;
+
+    // Direction should be unit vector, the multiply by speed?
+    const [nextX, nextY] = [
+      ballPositionRef.current.x + (ballDirectionRef.current.x * ballSpeed),
+      ballPositionRef.current.y + (ballDirectionRef.current.y * ballSpeed)
+    ];
+
+    let nextPos = { x: nextX, y: nextY };
+
+    // Paddle = bounce X
+    // Hardcoded based on paddle width
+    if (
+      (nextX <= xCenter - halfWidth + 1 && (nextY <= p1PaddleCenterRef.current + 1 && nextY >= p1PaddleCenterRef.current - 1))
+      ||
+      (nextX >= xCenter + halfWidth - 1 && (nextY <= p2PaddleCenterRef.current + 1 && nextY >= p2PaddleCenterRef.current - 1))
+    ) {
+      // TODO: Bounce angle change based on where it hit on the paddle;
+      nextPos.x = ballPositionRef.current.x + (-ballDirectionRef.current.x * ballSpeed);
+      const xBounceDir = { x: -ballDirectionRef.current.x, y: ballDirectionRef.current.y };
+      setBallDirection(xBounceDir);
+      ballDirectionRef.current = xBounceDir;
+    } else {
+       // Left/Right walls = score for opposite side
+      if (nextX <= xCenter - halfWidth || nextX >= xCenter + halfWidth) {
+        nextPos = { x: xCenter, y: yCenter };
+        setBallPosition(nextPos);
+        // TODO: Add time delay (maybe hard)
+        const resetBallDirection = getRandomUnitDirectionVector();
+        setBallDirection(resetBallDirection);
+        ballDirectionRef.current = resetBallDirection;
+        if (nextX >= xCenter + halfWidth) {
+          console.log("RIGHT WALL");
+          incrementScore(1);
+        } else {
+          console.log("LEFT WALL");
+          incrementScore(2);
+        }
+      };
+    }
+
+    // Check if next pos collide
+    // Up/down walls = bounce Y, keep X
+    if (nextY <= yCenter - halfHeight || nextY >= yCenter + halfHeight) {
+      console.log("TOP/BOTTOM WALL");
+      nextPos.y = ballPositionRef.current.y + (-ballDirectionRef.current.y * ballSpeed);
+      const yBounceDir = { x: ballDirectionRef.current.x, y: -ballDirectionRef.current.y };
+      setBallDirection(yBounceDir);
+      ballDirectionRef.current = yBounceDir;
+    }
+
+    moveBallToPos(nextPos);
+  }
 
   return (
     <div className="app" ref={appRef}>
@@ -557,6 +636,7 @@ const App = () => {
                     selected={tile.properties.selected}
                     handleClick={tile.properties.handleClick}
                     key={`${xidx}-${yidx}`}
+                    isBall={tile.properties.isBall}
                   />
                 )
               })}
