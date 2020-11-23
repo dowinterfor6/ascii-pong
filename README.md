@@ -5,3 +5,5 @@ Game over/reset screen
 Ball bounce off different angle based on paddle
 Some sort of tutorial/sidebar saying what controls are
 AI for 1P
+Add disclaimer for computer spec requirements
+keydown for paddle movement instead of keyup
