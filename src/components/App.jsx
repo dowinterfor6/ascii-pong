@@ -635,6 +635,7 @@ const App = () => {
   }
 
   const getPaddleBouncedDir = (ballY, paddleCenter, xDir) => {
+    // I think this is still a little buggy
     // BallY - PaddleCenter / PaddleWidth/2 * PI + Offset to ensure y dir !== 0;
     const ratio = (ballY - paddleCenter) / 1.5;
     let angle = (ratio * Math.PI);
