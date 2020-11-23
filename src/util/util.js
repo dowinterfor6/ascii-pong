@@ -71,12 +71,84 @@ export const getLanding = (docHeight, docWidth) => {
   
   return formattedLines;
 }
+
+// Imitate 7 Segment display
+const displayNumArr = [
+`
+ ███ 
+█   █
+█   █
+█   █
+ ███ `,
+`
+    █
+    █
+    █
+    █
+    █`,
+`
+█████
+    █
+█████
+█    
+█████`,
+`
+█████
+    █
+█████
+    █
+█████`,
+`
+█   █
+█   █
+█████
+    █
+    █`,
+`
+█████
+█    
+█████
+    █
+█████`,
+`
+█████
+█    
+█████
+█   █
+█████`,
+`
+█████
+    █
+    █
+    █
+    █`,
+`
+█████
+█   █
+█████
+█   █
+█████`,
+`
+█████
+█   █
+█████
+    █
+█████`
+];
+
+export const getDisplayNumMatrix = (num) => {
+  // Can't be greater than 7 (score limit)
+  // so this method works
+  return displayNumArr[num].split("\n").filter((el) => el !== "").map((str) => str.split("")); 
+}
   
-  window.getLanding = getLanding;
+window.getLanding = getLanding;
+window.getNum = getDisplayNumMatrix;
 // Useful:
 /*
   Full Block: 9608
   Smol block: 9642
   Left Triangle: 9664
   Triangles: 9698, 9699, 9700, 9701
+  Circle: 9679
 */

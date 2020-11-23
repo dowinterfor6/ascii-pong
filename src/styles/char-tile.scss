@@ -1,14 +1,17 @@
 .char-tile {
-  color: $grey;
-  transition: color 1s;
-  transition-delay: 1s;
+  // color: $grey;
+  color: $dark-green;
   
   &.isClickable {
     cursor: pointer;
   }
-
+  
   &.active {
-    color: black;
+    // Only fade in, no fade out, fixes score visual bug
+    // TODO: Probably need another, faster one for paddle
+    transition: color 1s;
+    // color: black;
+    color: $light-green;
 
     &.selected {
       font-weight: bold;

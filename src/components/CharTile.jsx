@@ -3,16 +3,13 @@ import React, { useEffect, useRef } from 'react';
 const CharTile = ({ char, active, selected, handleClick }) => {
   const tileRef = useRef();
 
-  useEffect(() => {
-    if (active) {
-      tileRef.current.classList.add("active");
-    }
-  })
+  // TODO: Add fade in animation at the start
 
   return (
     <div
       className={`
         char-tile
+        ${active ? 'active' : ''}
         ${selected ? 'selected' : ''}
         ${handleClick ? 'isClickable' : ''}
       `}
