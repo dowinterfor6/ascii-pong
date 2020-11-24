@@ -149,6 +149,9 @@ const App = () => {
   const paddle1YDiffRef = useRef(0);
   const paddle2YDiffRef = useRef(0);
 
+  const paddle1PrevYRef = useRef(0);
+  const paddle2PrevYRef = useRef(0);
+
   const setTiles = (tiles) => dispatch({
     type: SET_TILES,
     payload: tiles
@@ -512,18 +515,24 @@ const App = () => {
           break;
         // P2
         case "ArrowUp":
-          if (p2PaddleCenterRef.current !== y1) {
-            setP2PaddleCenter(p2PaddleCenterRef.current - 1);
-            p2PaddleCenterRef.current--;
-            movePaddle(2, p2PaddleCenterRef.current, -1);
+          if (paddle2YDiffRef.current > halfHeight + 2) {
+            paddle2YDiffRef.current--;
           }
+          // if (p2PaddleCenterRef.current !== y1) {
+          //   setP2PaddleCenter(p2PaddleCenterRef.current - 1);
+          //   p2PaddleCenterRef.current--;
+          //   movePaddle(2, p2PaddleCenterRef.current, -1);
+          // }
           break;
         case "ArrowDown":
-          if (p2PaddleCenterRef.current !== y2) {
-            setP2PaddleCenter(p2PaddleCenterRef.current + 1);
-            p2PaddleCenterRef.current++;
-            movePaddle(2, p2PaddleCenterRef.current, 1);
+          if (paddle2YDiffRef.current < halfHeight - 2) {
+            paddle2YDiffRef.current++;
           }
+          // if (p2PaddleCenterRef.current !== y2) {
+          //   setP2PaddleCenter(p2PaddleCenterRef.current + 1);
+          //   p2PaddleCenterRef.current++;
+          //   movePaddle(2, p2PaddleCenterRef.current, 1);
+          // }
           break;
         default:
           break;
@@ -570,14 +579,44 @@ const App = () => {
     }
   }
 
-  const movePaddleTo = (player, toPos) => {
-    // TODO: How do i get rid of previous?
+  // TODO: Refactor this to handle both player check instead of using game tick method
+  const movePaddleTo = (player) => {
     const paddleX = player === 1 ? xCenter - halfWidth + 1 : xCenter + halfWidth - 1;
-    setTile(paddleX, toPos - 1, "█", { active: true });
-    setTile(paddleX, toPos, "█", { active: true });
-    setTile(paddleX, toPos + 1, "█", { active: true });
-    // setP1PaddleCenter(toPos);
-    // p1PaddleCenterRef.current = toPos;
+    // TODO: Doing this one lazily, remove all, add all, hope it doesn't bite back
+
+    if (player === 1) {
+      const needsUpdate = paddle1PrevYRef.current !== paddle1YDiffRef.current;
+
+      if (needsUpdate) {
+        const [from, to] = [yCenter + paddle1PrevYRef.current, yCenter + paddle1YDiffRef.current];
+
+        setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
+        setTile(paddleX, from, getRandomAsciiChar(), { active: false });
+        setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
+        
+        setTile(paddleX, to - 1, "█", { active: true });
+        setTile(paddleX, to, "█", { active: true });
+        setTile(paddleX, to + 1, "█", { active: true });
+
+        paddle1PrevYRef.current = paddle1YDiffRef.current;
+      }
+    } else if (player === 2) {
+      const needsUpdate = paddle2PrevYRef.current !== paddle2YDiffRef.current;
+
+      if (needsUpdate) {
+        const [from, to] = [yCenter + paddle2PrevYRef.current, yCenter + paddle2YDiffRef.current];
+
+        setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
+        setTile(paddleX, from, getRandomAsciiChar(), { active: false });
+        setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
+        
+        setTile(paddleX, to - 1, "█", { active: true });
+        setTile(paddleX, to, "█", { active: true });
+        setTile(paddleX, to + 1, "█", { active: true });
+
+        paddle2PrevYRef.current = paddle2YDiffRef.current;
+      }
+    }
   }
 
   const moveBallToPos = ({ x, y }) => {
@@ -611,6 +650,7 @@ const App = () => {
       (Math.round(nextX) >= xCenter + halfWidth - 1 && (Math.round(nextY) <= p2PaddleCenterRef.current + 1 + tempHitboxFix && Math.round(nextY) >= p2PaddleCenterRef.current - 1 - tempHitboxFix))
     ) {
       console.log("PADDLE");
+      // TODO: Update to use the other ref
       const paddleCenter = Math.round(nextX) <= xCenter - halfWidth + 1 ? p1PaddleCenterRef.current : p2PaddleCenterRef.current;
       const newDir = getPaddleBouncedDir(nextY, paddleCenter, -ballDirectionRef.current.x);
 
@@ -671,8 +711,9 @@ const App = () => {
 
   const handlePaddlesGameTick = () => {
     // P1
-    movePaddleTo(1, yCenter + paddle1YDiffRef.current)
+    movePaddleTo(1)
     // P2
+    movePaddleTo(2)
   }
 
   return (
