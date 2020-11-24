@@ -362,7 +362,7 @@ const App = () => {
     gameTick = setInterval(() => {
       handleBallGameTick();
       handlePaddlesGameTick();
-    }, 1000 / 30);
+    }, 1000 / 15);
   };
 
   const setupGameBounds = () => {
