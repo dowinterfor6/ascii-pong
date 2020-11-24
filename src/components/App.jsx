@@ -146,6 +146,9 @@ const App = () => {
   const ballDirectionRef = useRef(ballDirection);
   const ballPositionRef = useRef(ballPosition);
 
+  const paddle1YDiffRef = useRef(0);
+  const paddle2YDiffRef = useRef(0);
+
   const setTiles = (tiles) => dispatch({
     type: SET_TILES,
     payload: tiles
@@ -355,7 +358,7 @@ const App = () => {
     // TODO: Remember to clear interval when game finishes
     gameTick = setInterval(() => {
       handleBallGameTick();
-      // console.log("TICK");
+      handlePaddlesGameTick();
     }, 1000 / 30);
   };
 
@@ -490,17 +493,21 @@ const App = () => {
       switch(e.code) {
         // P1
         case "KeyW":
-          if (p1PaddleCenterRef.current !== y1) {
-            setP1PaddleCenter(p1PaddleCenterRef.current - 1);
-            p1PaddleCenterRef.current--;
-            movePaddle(1, p1PaddleCenterRef.current, -1);
+          // if (p1PaddleCenterRef.current > yCenter - halfHeight + (paddleHeight - 1) / 2 + 1) {
+          if (paddle1YDiffRef.current > -halfHeight + 2) {
+            paddle1YDiffRef.current--;
+            // setP1PaddleCenter(p1PaddleCenterRef.current - 1);
+            // p1PaddleCenterRef.current--;
+            // movePaddle(1, p1PaddleCenterRef.current, -1);
           }
           break;
         case "KeyS":
-          if (p1PaddleCenterRef.current !== y2) {
-            setP1PaddleCenter(p1PaddleCenterRef.current + 1);
-            p1PaddleCenterRef.current++;
-            movePaddle(1, p1PaddleCenterRef.current, 1);
+          // if (p1PaddleCenterRef.current < yCenter + halfHeight - (paddleHeight - 1) / 2 - 1) {
+          if (paddle1YDiffRef.current < halfHeight - 2) {
+            paddle1YDiffRef.current++;
+            // setP1PaddleCenter(p1PaddleCenterRef.current + 1);
+            // p1PaddleCenterRef.current++;
+            // movePaddle(1, p1PaddleCenterRef.current, 1);
           }
           break;
         // P2
@@ -561,6 +568,16 @@ const App = () => {
       setTile(paddleX, currPos - 2, getRandomAsciiChar(), { active: false });
       setTile(paddleX, currPos + 1, "█", { active: true });
     }
+  }
+
+  const movePaddleTo = (player, toPos) => {
+    // TODO: How do i get rid of previous?
+    const paddleX = player === 1 ? xCenter - halfWidth + 1 : xCenter + halfWidth - 1;
+    setTile(paddleX, toPos - 1, "█", { active: true });
+    setTile(paddleX, toPos, "█", { active: true });
+    setTile(paddleX, toPos + 1, "█", { active: true });
+    // setP1PaddleCenter(toPos);
+    // p1PaddleCenterRef.current = toPos;
   }
 
   const moveBallToPos = ({ x, y }) => {
@@ -650,6 +667,12 @@ const App = () => {
     const magnitude = Math.sqrt(1 + Math.pow(x, 2));
 
     return { y: angle / Math.abs(angle) / magnitude, x: x / magnitude };
+  }
+
+  const handlePaddlesGameTick = () => {
+    // P1
+    movePaddleTo(1, yCenter + paddle1YDiffRef.current)
+    // P2
   }
 
   return (
