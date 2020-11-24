@@ -515,7 +515,7 @@ const App = () => {
           break;
         // P2
         case "ArrowUp":
-          if (paddle2YDiffRef.current > halfHeight + 2) {
+          if (paddle2YDiffRef.current > -halfHeight + 2) {
             paddle2YDiffRef.current--;
           }
           // if (p2PaddleCenterRef.current !== y1) {
