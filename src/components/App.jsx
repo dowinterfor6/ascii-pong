@@ -362,7 +362,7 @@ const App = () => {
     gameTick = setInterval(() => {
       handleBallGameTick();
       handlePaddlesGameTick();
-    }, 1000 / 15);
+    }, 1000 / 10);
   };
 
   const setupGameBounds = () => {
@@ -485,7 +485,8 @@ const App = () => {
     // TODO: Handle hold down?
     // Make this a part of game tick to check performance
     // Lags a little, might need to set up to calculate pos and handle every 30/60fps state rerender
-
+    // TODO: Handle both key press
+    
     document.addEventListener("keydown", (e) => {
       if (!isGameActiveRef.current) return;
 
