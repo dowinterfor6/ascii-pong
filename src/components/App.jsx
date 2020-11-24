@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { getAllAsciiChar, getDisplayNumMatrix, getLanding, getRandomAsciiChar } from '../util/util';
+import { getAllAsciiChar, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard } from '../util/util';
 import CharTile from './CharTile';
 
 const SET_TILES = "SETTILES";
@@ -109,7 +109,7 @@ const initialState = {
   gameState: {
     landing: true,
     game: false,
-    winnder: undefined,
+    winner: undefined,
     score: {
       p1: 0,
       p2: 0
@@ -121,9 +121,11 @@ const App = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [p1PaddleCenter, setP1PaddleCenter] = useState();
   const [p2PaddleCenter, setP2PaddleCenter] = useState();
-  // Temp solution, alt use state?
+
   const [isGameActive, setIsGameActive] = useState(false);
   const isGameActiveRef = useRef(isGameActive);
+
+  // TODO: I forgot if these are actually being used
   const p1PaddleCenterRef = useRef(p1PaddleCenter);
   const p2PaddleCenterRef = useRef(p2PaddleCenter);
 
@@ -151,6 +153,17 @@ const App = () => {
 
   const paddle1PrevYRef = useRef(0);
   const paddle2PrevYRef = useRef(0);
+
+  const gameTickRef = useRef();
+  
+  const validKeys = ["KeyW", "KeyS", "ArrowUp", "ArrowDown"];
+
+  const keyDownRef = useRef({
+    "KeyW": false,
+    "KeyS": false,
+    "ArrowUp": false,
+    "ArrowDown": false
+  });
 
   const setTiles = (tiles) => dispatch({
     type: SET_TILES,
@@ -347,9 +360,7 @@ const App = () => {
   // Add a different screen/warning for incompatible screen size?
   const halfWidth = 45;
   const halfHeight = 12;
-
-  let gameTick;
-  const ballSpeed = 1;
+  const ballSpeed = 10;
 
   const setupGameArea = () => {
     console.log("SETUP GAME AREA");
@@ -359,9 +370,11 @@ const App = () => {
     moveBallToPos({ x: xCenter, y: yCenter });
     // set interval to update game physics
     // TODO: Remember to clear interval when game finishes
-    gameTick = setInterval(() => {
-      handleBallGameTick();
-      handlePaddlesGameTick();
+    gameTickRef.current = setInterval(() => {
+      if (isGameActiveRef.current) {
+        handleBallGameTick();
+        handlePaddlesGameTick();
+      }
     }, 1000 / 10);
   };
 
@@ -377,7 +390,7 @@ const App = () => {
           setTile(x, y, "|", { active: true });
         } else if (x === xCenter) {
           // TODO: Should this be above the actual board?
-          // Or make the ball 2 full bar
+          // gave up after ~1 min of effort
           setTile(x, y, ":", { active: true })
         }
       }
@@ -444,8 +457,10 @@ const App = () => {
       }
 
       if (state.gameState.score.p1 === winningScore) {
-        console.log("P1 wins");
-        // Display win screen + back to home
+        setIsGameActive(false);
+        isGameActiveRef.current = false;
+        clearInterval(gameTickRef.current);
+        showWinningScreen(1);
       }
     };
   }, [state.gameState.score.p1]);
@@ -475,8 +490,10 @@ const App = () => {
       }
 
       if (state.gameState.score.p2 === winningScore) {
-        console.log("P2 wins");
-        // Display win screen + back to home
+        setIsGameActive(false);
+        isGameActiveRef.current = false;
+        clearInterval(gameTickRef.current);
+        showWinningScreen(2);
       }
     };
   }, [state.gameState.score.p2]);
@@ -487,56 +504,38 @@ const App = () => {
     // Lags a little, might need to set up to calculate pos and handle every 30/60fps state rerender
     // TODO: Handle both key press
     
+    document.addEventListener("keyup", (e) => {
+      if (!isGameActiveRef.current) return;
+
+      if (validKeys.includes(e.code)) {
+        keyDownRef.current[e.code] = false;
+      }
+    });
+
     document.addEventListener("keydown", (e) => {
       if (!isGameActiveRef.current) return;
 
-      // Limits
-      // y1 = top of screen, y2 = bottom of screen
-      const [y1, y2] = [yCenter - halfHeight + (paddleHeight - 1) / 2 + 1, yCenter + halfHeight - (paddleHeight - 1) / 2 - 1];
-      
-      switch(e.code) {
-        // P1
-        case "KeyW":
-          // if (p1PaddleCenterRef.current > yCenter - halfHeight + (paddleHeight - 1) / 2 + 1) {
-          if (paddle1YDiffRef.current > -halfHeight + 2) {
-            paddle1YDiffRef.current--;
-            // setP1PaddleCenter(p1PaddleCenterRef.current - 1);
-            // p1PaddleCenterRef.current--;
-            // movePaddle(1, p1PaddleCenterRef.current, -1);
-          }
-          break;
-        case "KeyS":
-          // if (p1PaddleCenterRef.current < yCenter + halfHeight - (paddleHeight - 1) / 2 - 1) {
-          if (paddle1YDiffRef.current < halfHeight - 2) {
-            paddle1YDiffRef.current++;
-            // setP1PaddleCenter(p1PaddleCenterRef.current + 1);
-            // p1PaddleCenterRef.current++;
-            // movePaddle(1, p1PaddleCenterRef.current, 1);
-          }
-          break;
-        // P2
-        case "ArrowUp":
-          if (paddle2YDiffRef.current > -halfHeight + 2) {
-            paddle2YDiffRef.current--;
-          }
-          // if (p2PaddleCenterRef.current !== y1) {
-          //   setP2PaddleCenter(p2PaddleCenterRef.current - 1);
-          //   p2PaddleCenterRef.current--;
-          //   movePaddle(2, p2PaddleCenterRef.current, -1);
-          // }
-          break;
-        case "ArrowDown":
-          if (paddle2YDiffRef.current < halfHeight - 2) {
-            paddle2YDiffRef.current++;
-          }
-          // if (p2PaddleCenterRef.current !== y2) {
-          //   setP2PaddleCenter(p2PaddleCenterRef.current + 1);
-          //   p2PaddleCenterRef.current++;
-          //   movePaddle(2, p2PaddleCenterRef.current, 1);
-          // }
-          break;
-        default:
-          break;
+      if (validKeys.includes(e.code)) {
+        switch(e.code) {
+          case "KeyW":
+            keyDownRef.current.KeyW = true;
+            keyDownRef.current.KeyS = false;
+            break;
+          case "KeyS":
+            keyDownRef.current.KeyW = false;
+            keyDownRef.current.KeyS = true;
+            break;
+          case "ArrowUp":
+            keyDownRef.current.ArrowUp = true;
+            keyDownRef.current.ArrowDown = false;
+            break;
+          case "ArrowDown":
+            keyDownRef.current.ArrowUp = false;
+            keyDownRef.current.ArrowDown = true;
+            break;
+          default:
+            break;
+        }
       }
     });
   };
@@ -544,7 +543,6 @@ const App = () => {
   const paddleHeight = 3;
 
   const setupPaddles = () => {
-    // TODO: Add "bounce" property, also to walls
 
     // P1 Paddle
     // x = xCenter - halfWidth + 1
@@ -563,21 +561,6 @@ const App = () => {
     setTile(p2PaddleX, yCenter + (paddleHeight - 1) / 2, "█", { active: true })
     setP2PaddleCenter(yCenter);
     p2PaddleCenterRef.current = yCenter;
-  }
-
-  // TODO: Definitely need this to put on the same as game tick thread
-  const movePaddle = (player, currPos, direction) => {
-    const paddleX = player === 1 ? xCenter - halfWidth + 1 : xCenter + halfWidth - 1;
-
-    if (direction === -1) {
-      // Up
-      setTile(paddleX, currPos + 2, getRandomAsciiChar(), { active: false });
-      setTile(paddleX, currPos - 1, "█", { active: true });
-    } else {
-      // Down
-      setTile(paddleX, currPos - 2, getRandomAsciiChar(), { active: false });
-      setTile(paddleX, currPos + 1, "█", { active: true });
-    }
   }
 
   // TODO: Refactor this to handle both player check instead of using game tick method
@@ -621,6 +604,7 @@ const App = () => {
   }
 
   const moveBallToPos = ({ x, y }) => {
+    // TODO: Do i actually need isBall?
     setTile(Math.round(ballPositionRef.current.x), Math.round(ballPositionRef.current.y), getRandomAsciiChar(), { active: false, isBall: false });
     setBallPosition({ x, y });
     ballPositionRef.current = { x, y };
@@ -628,6 +612,7 @@ const App = () => {
   }
   
   const handleBallGameTick = () => {
+    console.log("BALL TICK");
     // TODO: Handle the ball destroying walls lol;
     // Even after fix, it's still destroying walls rip
     // I think it might be lag? Check back if updating paddle to gametick fixes it
@@ -645,14 +630,17 @@ const App = () => {
     // Paddle hitbox tempfix
     const tempHitboxFix = 0.5;
 
+    const [x1, x2] = [xCenter - halfWidth + 1, xCenter + halfWidth - 1];
+    // TODO: Be careful about name overlap and scope
+    const [p1PaddleCenter, p2PaddleCenter] = [yCenter + paddle1YDiffRef.current, yCenter + paddle2YDiffRef.current];
+      
     if (
-      (Math.round(nextX) <= xCenter - halfWidth + 1 && (Math.round(nextY) <= p1PaddleCenterRef.current + 1 + tempHitboxFix && Math.round(nextY) >= p1PaddleCenterRef.current - 1 - tempHitboxFix))
+      (Math.round(nextX) <= x1 && (Math.round(nextY) <= p1PaddleCenter + 1 + tempHitboxFix && Math.round(nextY) >= p1PaddleCenter - 1 - tempHitboxFix))
       ||
-      (Math.round(nextX) >= xCenter + halfWidth - 1 && (Math.round(nextY) <= p2PaddleCenterRef.current + 1 + tempHitboxFix && Math.round(nextY) >= p2PaddleCenterRef.current - 1 - tempHitboxFix))
+      (Math.round(nextX) >= x2 && (Math.round(nextY) <= p2PaddleCenter + 1 + tempHitboxFix && Math.round(nextY) >= p2PaddleCenter - 1 - tempHitboxFix))
     ) {
       console.log("PADDLE");
-      // TODO: Update to use the other ref
-      const paddleCenter = Math.round(nextX) <= xCenter - halfWidth + 1 ? p1PaddleCenterRef.current : p2PaddleCenterRef.current;
+      const paddleCenter = Math.round(nextX) <= xCenter - halfWidth + 1 ? p1PaddleCenter : p2PaddleCenter;
       const newDir = getPaddleBouncedDir(nextY, paddleCenter, -ballDirectionRef.current.x);
 
       nextPos.x = ballPositionRef.current.x + (newDir.x * ballSpeed);
@@ -712,9 +700,48 @@ const App = () => {
 
   const handlePaddlesGameTick = () => {
     // P1
+    if (keyDownRef.current.KeyW) {
+      paddle1YDiffRef.current--;
+    } else if (keyDownRef.current.KeyS) {
+      paddle1YDiffRef.current++;
+    }
     movePaddleTo(1)
     // P2
+    if (keyDownRef.current.ArrowUp) {
+      paddle2YDiffRef.current--;
+    } else if (keyDownRef.current.ArrowDown) {
+      paddle2YDiffRef.current++;
+    }
     movePaddleTo(2)
+  };
+
+  const showWinningScreen = (winner) => {
+    setTimeout(() => {
+      const winningMatrix = getWinningBoard(winner);
+      const offsetX = ((numXTiles - 1) / 2) - ((winningMatrix[0].length - 1) / 2);
+      const offsetY = ((numYTiles - 1) / 2) - ((winningMatrix.length - 1) / 2);
+  
+      for (let y = 0; y < winningMatrix.length; y++) {
+        for (let x = 0; x < winningMatrix[0].length; x++) {
+          const currEl = winningMatrix[y][x].char;
+          if (currEl !== " ") {
+            let properties = {
+              active: true
+            };
+  
+            setTile(x + offsetX, y + offsetY, currEl, properties);
+          } else {
+            // TODO: Not needed if i fix middle line
+            if (x + offsetX === xCenter) {
+              setTile(x + offsetX, y + offsetY, getRandomAsciiChar(), { active: false });
+            }
+          }
+        };
+      };
+      console.log(`P${winner} won!`);
+    }, 200)
+
+    // setupClickEvents(offsetX, offsetY);
   }
 
   return (

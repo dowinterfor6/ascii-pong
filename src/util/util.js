@@ -141,9 +141,50 @@ export const getDisplayNumMatrix = (num) => {
   // so this method works
   return displayNumArr[num].split("\n").filter((el) => el !== "").map((str) => str.split("")); 
 }
+
+export const getWinningBoard = (winner) => {
+  const displayWinner = `P${winner}`;
+  const winningChars = `
+    <section>------------------------------------------
+    |                                                 |
+    |                                                 |
+    |        <h1>Congratulations, ${displayWinner} won!</h1>        |
+    |                                                 |
+    |                                                 |
+    |                                                 |
+    |                                                 |
+    |            <button>----------------             |
+    |            |       Main Menu      |             |
+    |            ---------------</button>             |
+    |                                                 |
+    |                                                 |
+    |                                                 |
+    -----------------------------------------</section>`
+
+  let winningLines = winningChars
+    .split("\n")
+    .filter((line) => line !== "")
+    .map((line) => line.trim());
+
+  let formattedWinningLines = [];
+  
+  // Assign char to matrix
+  for(let y = 0; y < winningLines.length; y++) {
+    const row = [];
+
+    for(let x = 0; x < winningLines[0].length; x++) {
+      row.push({ char: winningLines[y][x] });
+    };
+
+    formattedWinningLines.push(row);
+  }
+
+  return formattedWinningLines;
+}
   
 window.getLanding = getLanding;
 window.getNum = getDisplayNumMatrix;
+window.getWin = getWinningBoard;
 // Useful:
 /*
   Full Block: 9608
