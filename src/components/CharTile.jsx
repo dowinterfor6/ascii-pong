@@ -9,6 +9,7 @@ const CharTile = ({
 }) => {
   const tileRef = useRef();
   // TODO: Add fade in animation at the start
+  // console.log("RENDER: ", char);
 
   return (
     <div

@@ -1,5 +1,6 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { getAllAsciiChar, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard } from '../util/util';
+import CenterTile from './CenterTile';
 import CharTile from './CharTile';
 
 const SET_TILES = "SETTILES";
@@ -125,10 +126,6 @@ const App = () => {
   const [isGameActive, setIsGameActive] = useState(false);
   const isGameActiveRef = useRef(isGameActive);
 
-  // TODO: I forgot if these are actually being used
-  const p1PaddleCenterRef = useRef(p1PaddleCenter);
-  const p2PaddleCenterRef = useRef(p2PaddleCenter);
-
   const xDirThreshold = 0.5;
 
   const getRandomUnitDirectionVector = () => {
@@ -141,7 +138,6 @@ const App = () => {
     return { x: xCoeff * x / magnitude, y: yCoeff * y / magnitude };
   }
 
-  // TODO: ensure never up or down
   const [ballDirection, setBallDirection] = useState(getRandomUnitDirectionVector());
 
   const [ballPosition, setBallPosition] = useState({ x: 0, y: 0 });
@@ -216,16 +212,13 @@ const App = () => {
   window.setTile = setTile;  
 
   // Font Height: 19px, Width: 8.8px;
-  // Font Height: 14px, Width: 6.61px;
   const appRef = useRef();
 
   const [tileHeight, tileWidth] = [19, 9];
-  // const [tileHeight, tileWidth] = [14, 6.61];
 
   // Size of box = 19px 9px
   let numXTiles = Math.floor(document.body.clientWidth / tileWidth);
   let numYTiles = Math.floor(document.body.clientHeight / tileHeight);
-  // console.log(`x: ${numXTiles}, y: ${numYTiles}`);
 
   // Ensure always odd num
   if (numXTiles % 2 === 0) {
@@ -325,20 +318,17 @@ const App = () => {
   };
 
   const setPlayersCallback = (offsetX, offsetY, num) => {
-    console.log(`${num}P`);
     setPlayers(offsetX, offsetY, num);
   };
 
   const startGameCallback = () => {
-    console.log("START GAME");
     clearLanding();
-    setupGameArea();
     setIsGameActive(true);
     isGameActiveRef.current = true;
+    setupGameArea();
   }
 
   const clearLanding = () => {
-    console.log("CLEAR LANDING");
     const landingMatrix = getLanding();
     const offsetX = ((numXTiles - 1) / 2) - ((landingMatrix[0].length - 1) / 2);
     const offsetY = ((numYTiles - 1) / 2) - ((landingMatrix.length - 1) / 2);
@@ -348,28 +338,27 @@ const App = () => {
         const currEl = landingMatrix[y][x].char;
         if (currEl !== " ") {
           const randChar = getRandomAsciiChar();
-          setTile(x + offsetX, y + offsetY, randChar, { active: false, clickable: false, handleClick: undefined });
+          setTile(x + offsetX, y + offsetY, randChar, { active: false, handleClick: undefined });
         };
+        setClickHandler(x + offsetX, y + offsetY, undefined);
       };
     };
   };
   
   const xCenter = (numXTiles - 1) / 2;
   const yCenter = (numYTiles - 1) / 2;
-  // TODO: Not responsive at all
-  // Add a different screen/warning for incompatible screen size?
+
   const halfWidth = 45;
   const halfHeight = 12;
-  const ballSpeed = 10;
+  const ballSpeed = 1.5;
 
   const setupGameArea = () => {
-    console.log("SETUP GAME AREA");
     setupGameBounds();
     setupScoreBoard();
     setupPaddles();
     moveBallToPos({ x: xCenter, y: yCenter });
-    // set interval to update game physics
-    // TODO: Remember to clear interval when game finishes
+
+    // Blistering fast 10 fps
     gameTickRef.current = setInterval(() => {
       if (isGameActiveRef.current) {
         handleBallGameTick();
@@ -388,30 +377,26 @@ const App = () => {
           setTile(x, y, "-", { active: true })
         } else if (x === x1 || x === x2) {
           setTile(x, y, "|", { active: true });
-        } else if (x === xCenter) {
-          // TODO: Should this be above the actual board?
-          // gave up after ~1 min of effort
-          setTile(x, y, ":", { active: true })
         }
       }
     };
-
   };
 
-  const yOffset = 1;
+  const topOfGameBound = yCenter - halfHeight;
+  const yOffset = topOfGameBound - 2;
   const xOffsetLeft = xCenter - (2 + 5);
   const xOffsetRight = xCenter + (2 + 1);
 
-  // TODO: Also need an update scoreboard method
   const setupScoreBoard = () => {
-    const [y1, y2] = [yOffset, yOffset + 4];
+    const [y1, y2] = [yOffset - 4, yOffset];
+    // const [y1, y2] = [topOfGameBound - 1, topOfGameBound - 5];
     const zero = getDisplayNumMatrix(0);
     // Left bounds
     for (let y = 0; y < 5; y++) {
       for (let x = 0; x < 5; x++) {
         const currChar = zero[y][x];
         if (currChar !== " ") {
-          setTile(x + xOffsetLeft, y + yOffset, currChar, { active: true });
+          setTile(x + xOffsetLeft, y + yOffset - 4, currChar, { active: true });
         }
       }
     }
@@ -423,7 +408,7 @@ const App = () => {
       for (let x = 0; x < 5; x++) {
         const currChar = zero[y][x];
         if (currChar !== " ") {
-          setTile(x + xOffsetRight, y + yOffset, currChar, { active: true });
+          setTile(x + xOffsetRight, y + yOffset - 4, currChar, { active: true });
         }
       }
     }
@@ -437,7 +422,6 @@ const App = () => {
     if (state.gameState.score.p1 === 0) return;
     
     if (state.gameState.score.p1 <= winningScore) {
-      console.log("P1 Score changed");
       const prevScore = state.gameState.score.p1 - 1;
       const currScore = prevScore + 1;
       const prevScoreDisplay = getDisplayNumMatrix(prevScore);
@@ -448,9 +432,9 @@ const App = () => {
           const currChar = currScoreDisplay[y][x];
           if (currChar !== prevScoreDisplay[y][x]) {
             if (currChar === " ") {
-              setTile(x + xOffsetLeft, y + yOffset, getRandomAsciiChar(), { active: false })
+              setTile(x + xOffsetLeft, y + yOffset - 4, getRandomAsciiChar(), { active: false })
             } else {
-              setTile(x + xOffsetLeft, y + yOffset, currChar, { active: true })
+              setTile(x + xOffsetLeft, y + yOffset - 4, currChar, { active: true })
             }
           }
         }
@@ -470,7 +454,6 @@ const App = () => {
     if (state.gameState.score.p2 === 0) return;
     
     if (state.gameState.score.p2 <= winningScore) {
-      console.log("P2 Score changed");
       const prevScore = state.gameState.score.p2 - 1;
       const currScore = prevScore + 1;
       const prevScoreDisplay = getDisplayNumMatrix(prevScore);
@@ -481,9 +464,9 @@ const App = () => {
           const currChar = currScoreDisplay[y][x];
           if (currChar !== prevScoreDisplay[y][x]) {
             if (currChar === " ") {
-              setTile(x + xOffsetRight, y + yOffset, getRandomAsciiChar(), { active: false })
+              setTile(x + xOffsetRight, y + yOffset - 4, getRandomAsciiChar(), { active: false })
             } else {
-              setTile(x + xOffsetRight, y + yOffset, currChar, { active: true })
+              setTile(x + xOffsetRight, y + yOffset - 4, currChar, { active: true })
             }
           }
         }
@@ -498,12 +481,7 @@ const App = () => {
     };
   }, [state.gameState.score.p2]);
 
-  const setupPlayerKeybinds = () => {
-    // TODO: Handle hold down?
-    // Make this a part of game tick to check performance
-    // Lags a little, might need to set up to calculate pos and handle every 30/60fps state rerender
-    // TODO: Handle both key press
-    
+  const setupPlayerKeybinds = () => {    
     document.addEventListener("keyup", (e) => {
       if (!isGameActiveRef.current) return;
 
@@ -551,7 +529,6 @@ const App = () => {
     setTile(p1PaddleX, yCenter, "█", { active: true })
     setTile(p1PaddleX, yCenter + (paddleHeight - 1) / 2, "█", { active: true })
     setP1PaddleCenter(yCenter);
-    p1PaddleCenterRef.current = yCenter;
 
     // P2 Paddle
     // x = xCenter + halfWidth - 1
@@ -560,13 +537,10 @@ const App = () => {
     setTile(p2PaddleX, yCenter, "█", { active: true })
     setTile(p2PaddleX, yCenter + (paddleHeight - 1) / 2, "█", { active: true })
     setP2PaddleCenter(yCenter);
-    p2PaddleCenterRef.current = yCenter;
   }
 
-  // TODO: Refactor this to handle both player check instead of using game tick method
   const movePaddleTo = (player) => {
     const paddleX = player === 1 ? xCenter - halfWidth + 1 : xCenter + halfWidth - 1;
-    // TODO: Doing this one lazily, remove all, add all, hope it doesn't bite back
 
     if (player === 1) {
       const needsUpdate = paddle1PrevYRef.current !== paddle1YDiffRef.current;
@@ -604,20 +578,24 @@ const App = () => {
   }
 
   const moveBallToPos = ({ x, y }) => {
-    // TODO: Do i actually need isBall?
-    setTile(Math.round(ballPositionRef.current.x), Math.round(ballPositionRef.current.y), getRandomAsciiChar(), { active: false, isBall: false });
-    setBallPosition({ x, y });
-    ballPositionRef.current = { x, y };
-    setTile(Math.round(x), Math.round(y), "●", { active: true, isBall: true });
+    let clearProperties = {
+      active: false,
+      isBall: false
+    };
+    let ballProperties = {
+      active: true,
+      isBall: true
+    }
+    setTile(Math.round(ballPositionRef.current.x), Math.round(ballPositionRef.current.y), getRandomAsciiChar(), clearProperties);
+    if (isGameActiveRef.current) {
+      setBallPosition({ x, y });
+      ballPositionRef.current = { x, y };
+      setTile(Math.round(x), Math.round(y), "●", ballProperties);
+    }
   }
   
   const handleBallGameTick = () => {
-    console.log("BALL TICK");
-    // TODO: Handle the ball destroying walls lol;
-    // Even after fix, it's still destroying walls rip
-    // I think it might be lag? Check back if updating paddle to gametick fixes it
-
-    // Direction should be unit vector, the multiply by speed?
+    // Direction should be unit vector, the multiply by speed
     const [nextX, nextY] = [
       ballPositionRef.current.x + (ballDirectionRef.current.x * ballSpeed),
       ballPositionRef.current.y + (ballDirectionRef.current.y * ballSpeed)
@@ -631,7 +609,6 @@ const App = () => {
     const tempHitboxFix = 0.5;
 
     const [x1, x2] = [xCenter - halfWidth + 1, xCenter + halfWidth - 1];
-    // TODO: Be careful about name overlap and scope
     const [p1PaddleCenter, p2PaddleCenter] = [yCenter + paddle1YDiffRef.current, yCenter + paddle2YDiffRef.current];
       
     if (
@@ -639,7 +616,6 @@ const App = () => {
       ||
       (Math.round(nextX) >= x2 && (Math.round(nextY) <= p2PaddleCenter + 1 + tempHitboxFix && Math.round(nextY) >= p2PaddleCenter - 1 - tempHitboxFix))
     ) {
-      console.log("PADDLE");
       const paddleCenter = Math.round(nextX) <= xCenter - halfWidth + 1 ? p1PaddleCenter : p2PaddleCenter;
       const newDir = getPaddleBouncedDir(nextY, paddleCenter, -ballDirectionRef.current.x);
 
@@ -652,15 +628,12 @@ const App = () => {
       if (Math.round(nextX) <= xCenter - halfWidth || Math.round(nextX) >= xCenter + halfWidth) {
         nextPos = { x: xCenter, y: yCenter };
         setBallPosition(nextPos);
-        // TODO: Add time delay (maybe hard)
         const resetBallDirection = getRandomUnitDirectionVector();
         setBallDirection(resetBallDirection);
         ballDirectionRef.current = resetBallDirection;
         if (Math.round(nextX) >= xCenter + halfWidth) {
-          console.log("RIGHT WALL");
           incrementScore(1);
         } else {
-          console.log("LEFT WALL");
           incrementScore(2);
         }
       };
@@ -716,32 +689,147 @@ const App = () => {
   };
 
   const showWinningScreen = (winner) => {
-    setTimeout(() => {
-      const winningMatrix = getWinningBoard(winner);
-      const offsetX = ((numXTiles - 1) / 2) - ((winningMatrix[0].length - 1) / 2);
-      const offsetY = ((numYTiles - 1) / 2) - ((winningMatrix.length - 1) / 2);
-  
-      for (let y = 0; y < winningMatrix.length; y++) {
-        for (let x = 0; x < winningMatrix[0].length; x++) {
-          const currEl = winningMatrix[y][x].char;
-          if (currEl !== " ") {
-            let properties = {
-              active: true
-            };
-  
-            setTile(x + offsetX, y + offsetY, currEl, properties);
-          } else {
-            // TODO: Not needed if i fix middle line
-            if (x + offsetX === xCenter) {
-              setTile(x + offsetX, y + offsetY, getRandomAsciiChar(), { active: false });
-            }
-          }
+    const winningMatrix = getWinningBoard(winner);
+    const offsetX = ((numXTiles - 1) / 2) - ((winningMatrix[0].length - 1) / 2);
+    const offsetY = ((numYTiles - 1) / 2) - ((winningMatrix.length - 1) / 2);
+
+    for (let y = 0; y < winningMatrix.length; y++) {
+      for (let x = 0; x < winningMatrix[0].length; x++) {
+        const currEl = winningMatrix[y][x].char;
+        if (currEl !== " ") {
+          let properties = {
+            active: true
+          };
+
+          setTile(x + offsetX, y + offsetY, currEl, properties);
         };
       };
-      console.log(`P${winner} won!`);
-    }, 200)
+    };
 
-    // setupClickEvents(offsetX, offsetY);
+    setupMainMenuClickHandler();
+  }
+
+  const resetGameToLanding = () => {
+    clearWinningScreen();
+    clearGameBounds();
+    clearScore();
+    resetScores();
+    clearPaddles();
+    setupLanding();
+  }
+
+  const setupMainMenuClickHandler = () => {
+    // y + 1 to y + 3
+    // x from 13 to 36
+    for (let y = yCenter + 1; y <= yCenter + 3; y++) {
+      // It's not perfect :(
+      for (let x = xCenter - 12; x <= xCenter + 11; x++) {
+        setClickHandler(x, y, resetGameToLanding);
+      }
+    }
+  }
+
+  const clearWinningScreen = () => {
+    const winningMatrix = getWinningBoard(1);
+    const offsetX = ((numXTiles - 1) / 2) - ((winningMatrix[0].length - 1) / 2);
+    const offsetY = ((numYTiles - 1) / 2) - ((winningMatrix.length - 1) / 2);
+
+    for (let y = 0; y < winningMatrix.length; y++) {
+      for (let x = 0; x < winningMatrix[0].length; x++) {
+        const currEl = winningMatrix[y][x].char;
+        if (currEl !== " ") {
+          let properties = {
+            active: false,
+            handleClick: undefined,
+          };
+
+          setTile(x + offsetX, y + offsetY, getRandomAsciiChar(), properties);
+        }
+      };
+    };
+  }
+
+  const clearGameBounds = () => {
+    const [x1, x2] = [xCenter - halfWidth, xCenter + halfWidth];
+    const [y1, y2] = [yCenter - halfHeight, yCenter + halfHeight];
+
+    for (let y = y1; y <= y2; y++) {
+      for (let x = x1; x <= x2; x++) {
+        if (y === y1 || y === y2) {
+          setTile(x, y, getRandomAsciiChar(), { active: false })
+        } else if (x === x1 || x === x2) {
+          setTile(x, y, getRandomAsciiChar(), { active: false });
+        };
+      }
+    };
+  };
+
+  const clearScore = () => {
+    const [y1, y2] = [yOffset - 4, yOffset];
+
+    // Left bound
+    const leftScore = state.gameState.score.p1;
+    const leftScoreMatrix = getDisplayNumMatrix(leftScore);
+    for (let y = 0; y < 5; y++) {
+      for (let x = 0; x < 5; x++) {
+        const currChar = leftScoreMatrix[y][x];
+        if (currChar !== " ") {
+          setTile(x + xOffsetLeft, y + yOffset - 4, getRandomAsciiChar(), { active: false });
+        }
+      }
+    }
+    
+    // Middle bounds
+    setTile(xCenter, y1 + 1, getRandomAsciiChar(), { active: false });
+    setTile(xCenter, y2 - 1, getRandomAsciiChar(), { active: false });
+    
+    // Right bound
+    const rightScore = state.gameState.score.p2;
+    const rightScoreMatrix = getDisplayNumMatrix(rightScore);
+    for (let y = 0; y < 5; y++) {
+      for (let x = 0; x < 5; x++) {
+        const currChar = rightScoreMatrix[y][x];
+        if (currChar !== " ") {
+          setTile(x + xOffsetRight, y + yOffset - 4, getRandomAsciiChar(), { active: false });
+        }
+      }
+    }
+  };
+
+  const clearPaddles = () => {
+    const paddle1X = xCenter - halfWidth + 1;
+    const p1Center = yCenter + paddle1YDiffRef.current;
+    setTile(paddle1X, p1Center - 1, getRandomAsciiChar(), { active: false });
+    setTile(paddle1X, p1Center, getRandomAsciiChar(), { active: false });
+    setTile(paddle1X, p1Center + 1, getRandomAsciiChar(), { active: false });
+    
+    const paddle2X = xCenter + halfWidth - 1;
+    const p2Center = yCenter + paddle2YDiffRef.current;
+    setTile(paddle2X, p2Center - 1, getRandomAsciiChar(), { active: false });
+    setTile(paddle2X, p2Center, getRandomAsciiChar(), { active: false });
+    setTile(paddle2X, p2Center + 1, getRandomAsciiChar(), { active: false });
+  }
+
+  let centerTileComponent;
+  if (isGameActive) {
+    const numTiles = 2 * halfHeight - 1;
+    let centerTiles = [];
+    for (let i = 0; i < numTiles; i++) {
+      centerTiles.push(<CenterTile />);
+    }
+
+    // Magic numbers OP
+    centerTileComponent = (
+      <div className="center-line" style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: xCenter * 9 + 1}}>
+        {centerTiles.map((tile, idx) => {
+          return (
+            <div className="center-tile" key={`center-${idx}`}>
+              { tile }
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   return (
@@ -766,6 +854,7 @@ const App = () => {
           )
         })}
       </ul>
+      {centerTileComponent}
     </div>
   );
 }

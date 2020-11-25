@@ -154,7 +154,7 @@ export const getWinningBoard = (winner) => {
     |                                                 |
     |                                                 |
     |            <button>----------------             |
-    |            |       Main Menu      |             |
+    |            |      Main Menu       |             |
     |            ---------------</button>             |
     |                                                 |
     |                                                 |
