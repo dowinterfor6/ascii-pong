@@ -181,10 +181,43 @@ export const getWinningBoard = (winner) => {
 
   return formattedWinningLines;
 }
+
+export const getDisclaimer = () => {
+  // 90 x 24
+  const disclaimerStr = `
+    <footer>-----------------------------------------------------------------------------------
+    | <h2>Controls & Disclaimer</h2>                                                          |
+    | <p>                                                                                     |
+    |    P1 uses W & S, P2 uses ↑ & ↓. Winning score is 7. Game is not designed for small     |
+    |    screens. Game performance may suffer on low spec systems. Batteries not included.    |
+    | </p>                                                                                    |
+    ----------------------------------------------------------------------------------</footer>`;
+
+  let disclaimerLines = disclaimerStr
+    .split("\n")
+    .filter((line) => line !== "")
+    .map((line) => line.trim());
+
+  let formattedDisclaimerLines = [];
+  
+  // Assign char to matrix
+  for(let y = 0; y < disclaimerLines.length; y++) {
+    const row = [];
+
+    for(let x = 0; x < disclaimerLines[0].length; x++) {
+      row.push({ char: disclaimerLines[y][x] });
+    };
+
+    formattedDisclaimerLines.push(row);
+  }
+
+  return formattedDisclaimerLines;
+}
   
 window.getLanding = getLanding;
 window.getNum = getDisplayNumMatrix;
 window.getWin = getWinningBoard;
+window.disclaimer = getDisclaimer;
 // Useful:
 /*
   Full Block: 9608

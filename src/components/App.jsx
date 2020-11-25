@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { getAllAsciiChar, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard } from '../util/util';
+import { getAllAsciiChar, getDisclaimer, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard } from '../util/util';
 import CenterTile from './CenterTile';
 import CharTile from './CharTile';
 
@@ -105,7 +105,7 @@ const reducer = (state, action) => {
 
 const initialState = {
   tileMatrix: [],
-  players: 2,
+  players: 1,
   // Add logic for game state change
   gameState: {
     landing: true,
@@ -153,6 +153,8 @@ const App = () => {
   const gameTickRef = useRef();
   
   const validKeys = ["KeyW", "KeyS", "ArrowUp", "ArrowDown"];
+
+  const numPlayersRef = useRef(1);
 
   const keyDownRef = useRef({
     "KeyW": false,
@@ -254,6 +256,8 @@ const App = () => {
 
     setupLanding();
 
+    setupDisclaimer();
+
     setupPlayerKeybinds();
   }, []);
 
@@ -269,15 +273,24 @@ const App = () => {
           let properties = {
             active: true
           };
-          
-          // Default 2P
+
+          // Default 1P
           if (
-            (y === 7 && (x >= 20 && x <= 33)) ||
-            (y === 8 && [20, 26, 27, 33].includes(x)) ||
-            (y === 9 && (x >= 20 && x <= 33))
+            (y === 7 && (x >= 3 && x <= 16)) ||
+            (y === 8 && [3, 9, 10, 16].includes(x)) ||
+            (y === 9 && (x >= 3 && x <= 16))
           ) {
             properties.selected = true;
           };
+          
+          // // Default 2P
+          // if (
+          //   (y === 7 && (x >= 20 && x <= 33)) ||
+          //   (y === 8 && [20, 26, 27, 33].includes(x)) ||
+          //   (y === 9 && (x >= 20 && x <= 33))
+          // ) {
+          //   properties.selected = true;
+          // };
           setTile(x + offsetX, y + offsetY, currEl, properties);
         };
       };
@@ -318,6 +331,7 @@ const App = () => {
   };
 
   const setPlayersCallback = (offsetX, offsetY, num) => {
+    numPlayersRef.current = num;
     setPlayers(offsetX, offsetY, num);
   };
 
@@ -543,36 +557,47 @@ const App = () => {
     const paddleX = player === 1 ? xCenter - halfWidth + 1 : xCenter + halfWidth - 1;
 
     if (player === 1) {
-      const needsUpdate = paddle1PrevYRef.current !== paddle1YDiffRef.current;
-
-      if (needsUpdate) {
-        const [from, to] = [yCenter + paddle1PrevYRef.current, yCenter + paddle1YDiffRef.current];
-
-        setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
-        setTile(paddleX, from, getRandomAsciiChar(), { active: false });
-        setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
-        
-        setTile(paddleX, to - 1, "█", { active: true });
-        setTile(paddleX, to, "█", { active: true });
-        setTile(paddleX, to + 1, "█", { active: true });
-
-        paddle1PrevYRef.current = paddle1YDiffRef.current;
+      const outOfBounds = paddle1YDiffRef.current >= halfHeight - 1 || paddle1YDiffRef.current <= -halfHeight + 1;
+      if (outOfBounds) {
+        paddle1YDiffRef.current = paddle1PrevYRef.current;
+      } else {
+        const needsUpdate = paddle1PrevYRef.current !== paddle1YDiffRef.current;
+  
+        if (needsUpdate) {
+          const [from, to] = [yCenter + paddle1PrevYRef.current, yCenter + paddle1YDiffRef.current];
+  
+          setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
+          setTile(paddleX, from, getRandomAsciiChar(), { active: false });
+          setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
+          
+          setTile(paddleX, to - 1, "█", { active: true });
+          setTile(paddleX, to, "█", { active: true });
+          setTile(paddleX, to + 1, "█", { active: true });
+  
+          paddle1PrevYRef.current = paddle1YDiffRef.current;
+        }
       }
     } else if (player === 2) {
-      const needsUpdate = paddle2PrevYRef.current !== paddle2YDiffRef.current;
+      const outOfBounds = paddle2YDiffRef.current >= halfHeight - 1 || paddle2YDiffRef.current <= -halfHeight + 1;
+      
+      if (outOfBounds) {
+        paddle2YDiffRef.current = paddle2PrevYRef.current;
+      } else {
+        const needsUpdate = paddle2PrevYRef.current !== paddle2YDiffRef.current;
 
-      if (needsUpdate) {
-        const [from, to] = [yCenter + paddle2PrevYRef.current, yCenter + paddle2YDiffRef.current];
+        if (needsUpdate) {
+          const [from, to] = [yCenter + paddle2PrevYRef.current, yCenter + paddle2YDiffRef.current];
 
-        setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
-        setTile(paddleX, from, getRandomAsciiChar(), { active: false });
-        setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
-        
-        setTile(paddleX, to - 1, "█", { active: true });
-        setTile(paddleX, to, "█", { active: true });
-        setTile(paddleX, to + 1, "█", { active: true });
+          setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
+          setTile(paddleX, from, getRandomAsciiChar(), { active: false });
+          setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
+          
+          setTile(paddleX, to - 1, "█", { active: true });
+          setTile(paddleX, to, "█", { active: true });
+          setTile(paddleX, to + 1, "█", { active: true });
 
-        paddle2PrevYRef.current = paddle2YDiffRef.current;
+          paddle2PrevYRef.current = paddle2YDiffRef.current;
+        }
       }
     }
   }
@@ -679,13 +704,37 @@ const App = () => {
       paddle1YDiffRef.current++;
     }
     movePaddleTo(1)
-    // P2
-    if (keyDownRef.current.ArrowUp) {
-      paddle2YDiffRef.current--;
-    } else if (keyDownRef.current.ArrowDown) {
-      paddle2YDiffRef.current++;
+    if (numPlayersRef.current === 2) {
+      // P2
+      if (keyDownRef.current.ArrowUp) {
+        paddle2YDiffRef.current--;
+      } else if (keyDownRef.current.ArrowDown) {
+        paddle2YDiffRef.current++;
+      }
+      movePaddleTo(2)
+    } else {
+      // Track ball certain % of the time, rest of the time is random
+      const toBall = Math.random() < 0.85;
+
+      if (toBall) {
+        // Calculate what diff to get to ball
+        // TODO: Check limits
+        if (ballPositionRef.current.y > yCenter + paddle2PrevYRef.current) {
+          paddle2YDiffRef.current++;
+        } else if (ballPositionRef.current.y < yCenter + paddle2PrevYRef.current) {
+          paddle2YDiffRef.current--;
+        }
+      } else {
+        // Weighted to not move to help with performance
+        const randDir = (Math.random() * 2) - 1;
+        if (randDir > 0.75) {
+          paddle2YDiffRef.current--;
+        } else if (randDir < -0.75) {
+          paddle2YDiffRef.current++;
+        }
+      }
+      movePaddleTo(2);
     }
-    movePaddleTo(2)
   };
 
   const showWinningScreen = (winner) => {
@@ -830,6 +879,26 @@ const App = () => {
         })}
       </div>
     )
+  };
+
+  const setupDisclaimer = () => {
+    const disclaimerMatrix = getDisclaimer();
+
+    const offsetX = ((numXTiles - 1) / 2) - ((disclaimerMatrix[0].length - 1) / 2);
+    const offsetY = ((numYTiles - 1)) - ((disclaimerMatrix.length - 1));
+    
+    for (let y = 0; y < disclaimerMatrix.length; y++) {
+      for (let x = 0; x < disclaimerMatrix[0].length; x++) {
+        const currEl = disclaimerMatrix[y][x].char;
+        if (currEl !== " ") {
+          let properties = {
+            active: true
+          };
+
+          setTile(x + offsetX, y + offsetY, currEl, properties);
+        };
+      };
+    };
   }
 
   return (
