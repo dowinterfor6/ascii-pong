@@ -1,20 +1,20 @@
 {
   "files": {
-    "main.css": "/ascii-pong/static/css/main.7fbc28e0.chunk.css",
-    "main.js": "/ascii-pong/static/js/main.1f08ec59.chunk.js",
-    "main.js.map": "/ascii-pong/static/js/main.1f08ec59.chunk.js.map",
+    "main.css": "/ascii-pong/static/css/main.f22b25eb.chunk.css",
+    "main.js": "/ascii-pong/static/js/main.bd4d9b73.chunk.js",
+    "main.js.map": "/ascii-pong/static/js/main.bd4d9b73.chunk.js.map",
     "runtime-main.js": "/ascii-pong/static/js/runtime-main.182ebe25.js",
     "runtime-main.js.map": "/ascii-pong/static/js/runtime-main.182ebe25.js.map",
-    "static/js/2.2f815976.chunk.js": "/ascii-pong/static/js/2.2f815976.chunk.js",
-    "static/js/2.2f815976.chunk.js.map": "/ascii-pong/static/js/2.2f815976.chunk.js.map",
+    "static/js/2.aae3c8ee.chunk.js": "/ascii-pong/static/js/2.aae3c8ee.chunk.js",
+    "static/js/2.aae3c8ee.chunk.js.map": "/ascii-pong/static/js/2.aae3c8ee.chunk.js.map",
     "index.html": "/ascii-pong/index.html",
-    "static/css/main.7fbc28e0.chunk.css.map": "/ascii-pong/static/css/main.7fbc28e0.chunk.css.map",
-    "static/js/2.2f815976.chunk.js.LICENSE.txt": "/ascii-pong/static/js/2.2f815976.chunk.js.LICENSE.txt"
+    "static/css/main.f22b25eb.chunk.css.map": "/ascii-pong/static/css/main.f22b25eb.chunk.css.map",
+    "static/js/2.aae3c8ee.chunk.js.LICENSE.txt": "/ascii-pong/static/js/2.aae3c8ee.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.182ebe25.js",
-    "static/js/2.2f815976.chunk.js",
-    "static/css/main.7fbc28e0.chunk.css",
-    "static/js/main.1f08ec59.chunk.js"
+    "static/js/2.aae3c8ee.chunk.js",
+    "static/css/main.f22b25eb.chunk.css",
+    "static/js/main.bd4d9b73.chunk.js"
   ]
 }
