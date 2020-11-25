@@ -2,6 +2,8 @@ import React, { useEffect, useReducer, useRef, useState } from 'react';
 import { getAllAsciiChar, getDisclaimer, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard } from '../util/util';
 import CenterTile from './CenterTile';
 import CharTile from './CharTile';
+import HorizontalWall from './HorizontalWall';
+import VerticalWall from './VerticalWall';
 
 const SET_TILES = "SETTILES";
 const SET_TILE = "SETTILE";
@@ -860,14 +862,17 @@ const App = () => {
   }
 
   let centerTileComponent;
+  let leftWall, rightWall, topWall, bottomWall;
+
   if (isGameActive) {
     const numTiles = 2 * halfHeight - 1;
+
     let centerTiles = [];
     for (let i = 0; i < numTiles; i++) {
       centerTiles.push(<CenterTile />);
     }
 
-    // Magic numbers OP
+    // Magic numbers OP these are way off of the big screen lmao
     centerTileComponent = (
       <div className="center-line" style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: xCenter * 9 + 1}}>
         {centerTiles.map((tile, idx) => {
@@ -879,6 +884,11 @@ const App = () => {
         })}
       </div>
     )
+
+    leftWall = <VerticalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: (xCenter - halfWidth) * 9 + 1}}/>
+    rightWall = <VerticalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: (xCenter + halfWidth) * 9 + 1}}/>
+    topWall = <HorizontalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 30.5, left: (xCenter - halfWidth) * 9 + 1}}/>
+    bottomWall = <HorizontalWall style={{ top: (yCenter + halfHeight - 2) * 19 + 45.5, left: (xCenter - halfWidth) * 9 + 1}}/>
   };
 
   const setupDisclaimer = () => {
@@ -925,6 +935,10 @@ const App = () => {
         })}
       </ul>
       {centerTileComponent}
+      {leftWall}
+      {rightWall}
+      {topWall}
+      {bottomWall}
     </div>
   );
 }

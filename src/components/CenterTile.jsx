@@ -8,4 +8,6 @@ const CenterTile = () => {
   )
 }
 
-export default CenterTile;
+const MemoizedCenterTile = React.memo(CenterTile);
+
+export default MemoizedCenterTile;
