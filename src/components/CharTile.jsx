@@ -6,6 +6,7 @@ const CharTile = ({
   selected,
   handleClick,
   isBall,
+  isPaddle
 }) => {
   const tileRef = useRef();
   // TODO: Add fade in animation at the start
@@ -19,6 +20,7 @@ const CharTile = ({
         ${selected ? 'selected' : ''}
         ${handleClick ? 'is-clickable' : ''}
         ${isBall ? 'ball' : ''}
+        ${isPaddle ? 'paddle' : ''}
       `}
       ref={tileRef}
       onClick={handleClick}

@@ -8,14 +8,11 @@
   
   &.active {
     // Only fade in, no fade out, fixes score visual bug
-    // TODO: Probably need another, faster one for paddle
     transition: color 1s;
     color: black;
     // color: $light-green;
 
-    &.ball {
-      // Must be less than 30fps equivalent
-      // TODO: I cant make that work
+    &.ball, &.paddle {
       transition: none;
     }
 

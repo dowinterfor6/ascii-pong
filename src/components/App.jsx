@@ -372,13 +372,13 @@ const App = () => {
     setupPaddles();
     moveBallToPos({ x: xCenter, y: yCenter });
 
-    // Blistering fast 10 fps
+    // Blistering fast 5 fps
     gameTickRef.current = setInterval(() => {
       if (isGameActiveRef.current) {
         handleBallGameTick();
         handlePaddlesGameTick();
       }
-    }, 1000 / 10);
+    }, 1000 / 5);
   };
 
   const setupGameBounds = () => {
@@ -566,13 +566,13 @@ const App = () => {
         if (needsUpdate) {
           const [from, to] = [yCenter + paddle1PrevYRef.current, yCenter + paddle1YDiffRef.current];
   
-          setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
-          setTile(paddleX, from, getRandomAsciiChar(), { active: false });
-          setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
+          setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false, isPaddle: false });
+          setTile(paddleX, from, getRandomAsciiChar(), { active: false, isPaddle: false });
+          setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false, isPaddle: false });
           
-          setTile(paddleX, to - 1, "█", { active: true });
-          setTile(paddleX, to, "█", { active: true });
-          setTile(paddleX, to + 1, "█", { active: true });
+          setTile(paddleX, to - 1, "█", { active: true, isPaddle: true });
+          setTile(paddleX, to, "█", { active: true, isPaddle: true });
+          setTile(paddleX, to + 1, "█", { active: true, isPaddle: true });
   
           paddle1PrevYRef.current = paddle1YDiffRef.current;
         }
@@ -588,13 +588,13 @@ const App = () => {
         if (needsUpdate) {
           const [from, to] = [yCenter + paddle2PrevYRef.current, yCenter + paddle2YDiffRef.current];
 
-          setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false });
-          setTile(paddleX, from, getRandomAsciiChar(), { active: false });
-          setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false });
+          setTile(paddleX, from - 1, getRandomAsciiChar(), { active: false, isPaddle: false });
+          setTile(paddleX, from, getRandomAsciiChar(), { active: false, isPaddle: false });
+          setTile(paddleX, from + 1, getRandomAsciiChar(), { active: false, isPaddle: false });
           
-          setTile(paddleX, to - 1, "█", { active: true });
-          setTile(paddleX, to, "█", { active: true });
-          setTile(paddleX, to + 1, "█", { active: true });
+          setTile(paddleX, to - 1, "█", { active: true, isPaddle: true });
+          setTile(paddleX, to, "█", { active: true, isPaddle: true });
+          setTile(paddleX, to + 1, "█", { active: true, isPaddle: true });
 
           paddle2PrevYRef.current = paddle2YDiffRef.current;
         }
@@ -916,6 +916,7 @@ const App = () => {
                     handleClick={tile.properties.handleClick}
                     key={`${xidx}-${yidx}`}
                     isBall={tile.properties.isBall}
+                    isPaddle={tile.properties.isPaddle}
                   />
                 )
               })}
