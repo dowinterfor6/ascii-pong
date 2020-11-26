@@ -1,5 +1,5 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
-import { getAllAsciiChar, getDisclaimer, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard } from '../util/util';
+import { getAllAsciiChar, getDisclaimer, getDisplayNumMatrix, getLanding, getRandomAsciiChar, getWinningBoard, getColorThemeToggle } from '../util/util';
 import CenterTile from './CenterTile';
 import CharTile from './CharTile';
 import HorizontalWall from './HorizontalWall';
@@ -257,6 +257,8 @@ const App = () => {
     setTiles(initialRefMatrix);
 
     setupLanding();
+
+    // setupColorThemeToggle();
 
     setupDisclaimer();
 
@@ -861,35 +863,161 @@ const App = () => {
     setTile(paddle2X, p2Center + 1, getRandomAsciiChar(), { active: false });
   }
 
+  // const setupColorThemeToggle = () => {
+  //   const colorThemeMatrix = getColorThemeToggle();
+  //   for (let y = 0; y < colorThemeMatrix.length; y++) {
+  //     for (let x = 0; x < colorThemeMatrix[0].length; x++) {
+  //       const currEl = colorThemeMatrix[y][x].char;
+  //       if (currEl !== " ") {
+  //         let properties = {
+  //           active: true
+  //         };
+
+  //         // 4 <= y <= 6
+  //         // 2 <= x <= 15, 17 <= x <= 30
+  //         // x !== 9, x !== 24
+
+  //         // Default White
+  //         if (
+  //           (y === 4 && (x >= 2 && x <= 15)) ||
+  //           (y === 5 && (x >= 2 && x <= 15)) ||
+  //           (y === 6 && (x >= 2 && x <= 15))
+  //         ) {
+  //           properties.selected = true;
+  //           properties.handleClick = () => toggleColor('white');
+  //         };
+          
+  //         // Default Matrix
+  //         if (
+  //           (y === 4 && (x >= 17 && x <= 30)) ||
+  //           (y === 5 && (x >= 17 && x <= 30)) ||
+  //           (y === 6 && (x >= 17 && x <= 30))
+  //         ) {
+  //           // properties.selected = true;
+  //           properties.handleClick = () => toggleColor('green');
+  //         };
+
+  //         setTile(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, currEl, properties);
+  //       } else {
+  //         if (
+  //           (y === 4 && (x >= 2 && x <= 15)) ||
+  //           (y === 5 && (x >= 2 && x <= 15)) ||
+  //           (y === 6 && (x >= 2 && x <= 15))
+  //         ) {
+  //           setClickHandler(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, () => toggleColor('white'));
+  //         };
+          
+  //         // Default Matrix
+  //         if (
+  //           (y === 4 && (x >= 17 && x <= 30)) ||
+  //           (y === 5 && (x >= 17 && x <= 30)) ||
+  //           (y === 6 && (x >= 17 && x <= 30))
+  //         ) {
+  //           setClickHandler(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, () => toggleColor('green'));
+  //         }
+  //       }
+  //     };
+  //   };
+  // }
+
+  // // Not the most efficient way
+  // Actually it just doesn't work
+  // const toggleColor = (color) => {
+  //   const colorThemeMatrix = getColorThemeToggle();
+  //   console.log(document.documentElement.style);
+  //   // This is so inefficient
+  //   const els = [
+  //     ...document.querySelectorAll(".app"),
+  //     ...document.querySelectorAll(".center-line"),
+  //     ...document.querySelectorAll(".char-tile"),
+  //     ...document.querySelectorAll(".char-tile.active")
+  //   ]
+
+  //   if (color === 'green') {
+  //     for (let y = 4; y <= 6; y++) {
+  //       for (let x = 2; x <= 30; x++) {
+  //         const currEl = colorThemeMatrix[y][x].char;
+  //         if (
+  //           (y === 4 && (x >= 2 && x <= 15)) ||
+  //           (y === 5 && x !== 9 && (x >= 2 && x <= 15)) ||
+  //           (y === 6 && (x >= 2 && x <= 15))
+  //         ) {
+  //           setTile(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, currEl, { active: true, selected: false, handleClick: () => toggleColor('white')});
+  //         };
+
+  //         if (
+  //           (y === 4 && (x >= 17 && x <= 30)) ||
+  //           (y === 5 && x !== 24 && (x >= 17 && x <= 30)) ||
+  //           (y === 6 && (x >= 17 && x <= 30))
+  //         ) {
+  //           setTile(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, currEl, { active: true, selected: true, handleClick: () => toggleColor('green') });
+  //         };
+  //       }
+  //     }
+  //     els.forEach((el) => {
+  //       if (!el.classList.contains("matrix")) {
+  //         el.classList.add("matrix");
+  //       }
+  //     });
+  //   } else {
+  //     for (let y = 4; y <= 6; y++) {
+  //       for (let x = 2; x <= 30; x++) {
+  //         const currEl = colorThemeMatrix[y][x].char;
+  //         if (
+  //           (y === 4 && (x >= 2 && x <= 15)) ||
+  //           (y === 5 && x !== 9 && (x >= 2 && x <= 15)) ||
+  //           (y === 6 && (x >= 2 && x <= 15))
+  //         ) {
+  //           setTile(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, currEl, { active: true, selected: true, handleClick: () => toggleColor('white') });
+  //         };
+
+  //         if (
+  //           (y === 4 && (x >= 17 && x <= 30)) ||
+  //           (y === 5 && x !== 24 && (x >= 17 && x <= 30)) ||
+  //           (y === 6 && (x >= 17 && x <= 30))
+  //         ) {
+  //           setTile(numXTiles - colorThemeMatrix[0].length + x - 1, y + 1, currEl, { active: true, selected: false, handleClick: () => toggleColor('green') });
+  //         };
+  //       }
+  //     }
+  //     els.forEach((el) => {
+  //       if (!el.classList.contains("matrix")) {
+  //         el.classList.remove("matrix");
+  //       }
+  //     });
+  //   }
+  // }
+
   let centerTileComponent;
   let leftWall, rightWall, topWall, bottomWall;
 
-  if (isGameActive) {
-    const numTiles = 2 * halfHeight - 1;
+  // if (isGameActive) {
+  //   const numTiles = 2 * halfHeight - 1;
 
-    let centerTiles = [];
-    for (let i = 0; i < numTiles; i++) {
-      centerTiles.push(<CenterTile />);
-    }
+  //   let centerTiles = [];
+  //   for (let i = 0; i < numTiles; i++) {
+  //     centerTiles.push(<CenterTile />);
+  //   }
 
-    // Magic numbers OP these are way off of the big screen lmao
-    centerTileComponent = (
-      <div className="center-line" style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: xCenter * 9 + 1}}>
-        {centerTiles.map((tile, idx) => {
-          return (
-            <div className="center-tile" key={`center-${idx}`}>
-              { tile }
-            </div>
-          )
-        })}
-      </div>
-    )
-
-    leftWall = <VerticalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: (xCenter - halfWidth) * 9 + 1}}/>
-    rightWall = <VerticalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 11.5, left: (xCenter + halfWidth) * 9 + 1}}/>
-    topWall = <HorizontalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 30.5, left: (xCenter - halfWidth) * 9 + 1}}/>
-    bottomWall = <HorizontalWall style={{ top: (yCenter + halfHeight - 2) * 19 + 45.5, left: (xCenter - halfWidth) * 9 + 1}}/>
-  };
+  //   // Magic numbers OP these are way off of the big screen lmao
+  //   centerTileComponent = (
+  //     <div className="center-line" style={{ top: (yCenter - halfHeight + 1) * 19, left: xCenter * 9}}>
+  //       {centerTiles.map((tile, idx) => {
+  //         return (
+  //           <div className="center-tile" key={`center-${idx}`}>
+  //             { tile }
+  //           </div>
+  //         )
+  //       })}
+  //     </div>
+  //   )
+    
+  //   // I give up on this
+  //   leftWall = <VerticalWall style={{ top: (yCenter - halfHeight) * 19, left: (xCenter - halfWidth + 0.4) * 9}}/>
+  //   rightWall = <VerticalWall style={{ top: (yCenter - halfHeight) * 19, left: (xCenter + halfWidth + 0.4) * 9}}/>
+  //   topWall = <HorizontalWall style={{ top: (yCenter - halfHeight + 2) * 19 - 30.5, left: (xCenter - halfWidth) * 9 + 1}}/>
+  //   bottomWall = <HorizontalWall style={{ top: (yCenter + halfHeight - 2) * 19 + 45.5, left: (xCenter - halfWidth) * 9 + 1}}/>
+  // };
 
   const setupDisclaimer = () => {
     const disclaimerMatrix = getDisclaimer();

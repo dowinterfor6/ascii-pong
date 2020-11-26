@@ -212,12 +212,45 @@ export const getDisclaimer = () => {
   }
 
   return formattedDisclaimerLines;
+};
+
+export const getColorThemeToggle = () => {
+  const colorThemeStr = `
+    <aside>--------------------------
+    |                               |
+    |      <h2>Color Theme</h2>     |
+    |                               |
+    | <button>------ <button>------ |
+    | |Simple White| |Matrix Green| |
+    | -----</button> -----</button> |
+    -------------------------</aside>`;
+
+  let colorThemeLines = colorThemeStr
+    .split("\n")
+    .filter((line) => line !== "")
+    .map((line) => line.trim());
+
+  let formattedColorThemeLines = [];
+  
+  // Assign char to matrix
+  for(let y = 0; y < colorThemeLines.length; y++) {
+    const row = [];
+
+    for(let x = 0; x < colorThemeLines[0].length; x++) {
+      row.push({ char: colorThemeLines[y][x] });
+    };
+
+    formattedColorThemeLines.push(row);
+  }
+
+  return formattedColorThemeLines;
 }
   
 window.getLanding = getLanding;
 window.getNum = getDisplayNumMatrix;
 window.getWin = getWinningBoard;
 window.disclaimer = getDisclaimer;
+window.color = getColorThemeToggle;
 // Useful:
 /*
   Full Block: 9608
