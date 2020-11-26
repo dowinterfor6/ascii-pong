@@ -368,7 +368,7 @@ const App = () => {
 
   const halfWidth = 45;
   const halfHeight = 12;
-  const ballSpeed = 1.5;
+  const ballSpeed = 2;
 
   const setupGameArea = () => {
     setupGameBounds();
